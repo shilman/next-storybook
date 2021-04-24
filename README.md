@@ -20,5 +20,5 @@ yarn storybook --no-manager-cache --preview-url=http://localhost:7000/preview
 
 ## Limitations
 
-- ❌ It doesn't support `.storybook/main.js` globs, e.g. `stories: ['../stories/**/*.stories.@(js|jsx|ts|tsx)']`
+- ❌ It doesn't support `.storybook/main.js` globs, e.g. `'../**/*.stories.@(js|jsx|ts|tsx)'`
 - ❌ It doesn't yet support `@storybook/docs` webpack magic
