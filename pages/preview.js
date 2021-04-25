@@ -1,13 +1,18 @@
 // pages/preview.js
-import { useEffect } from 'react';
-import { configure } from '@storybook/react';
-import * as ButtonStories from '../stories/Button.stories';
-import * as HeaderStories from '../stories/Header.stories';
-import * as PageStories from '../stories/Page.stories';
+import { useEffect } from "react";
+import { configure } from "@storybook/react";
 
-const Preview = () => {
+const Preview = ({ stories = [] }) => {
   useEffect(() => {
-    configure(() => [ButtonStories, HeaderStories, PageStories], {});
+    Promise.all(
+      stories.map((fn) =>
+        import(
+          /* webpackInclude: /\.stories\.(js|jsx|ts|tsx|mdx)$/ */
+          /* webpackExclude: /\/node_modules\// */
+          `../${fn}`
+        )
+      )
+    ).then((modules) => configure(() => modules, {}));
   }, []);
 
   return (
@@ -16,7 +21,7 @@ const Preview = () => {
       <div id="docs-root"></div>
 
       <div className="sb-errordisplay sb-wrapper">
-        <div id="error-message" class="sb-heading"></div>
+        <div id="error-message" className="sb-heading"></div>
         <pre className="sb-errordisplay_code">
           <code id="error-stack"></code>
         </pre>
@@ -24,5 +29,25 @@ const Preview = () => {
     </>
   );
 };
+
+export async function getServerSideProps(_context) {
+  if (typeof window !== "undefined") {
+    throw new Error("Server-side only");
+  }
+  const { default: glob } = await import("glob-promise");
+  const stories = [
+    "stories/**/*.stories.mdx",
+    "stories/**/*.stories.@(js|jsx|ts|tsx)",
+  ];
+  const files = (
+    await Promise.all(stories.map(glob))
+  ).flat(1);
+
+  return {
+    props: {
+      stories: files,
+    },
+  };
+}
 
 export default Preview;
